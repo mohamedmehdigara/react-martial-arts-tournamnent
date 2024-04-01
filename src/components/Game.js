@@ -1,8 +1,11 @@
-// src/components/Game.js
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Player from './Player';
 import ActionButton from './ActionButton';
+import HealthBar from './HealthBar';
+import MatchResult from './MatchResult';
+import ScoreBoard from './ScoreBoard';
+import OpponentSelection from './OpponentSelection'; // Import the OpponentSelection component
 
 const Container = styled.div`
   max-width: 600px;
@@ -26,14 +29,38 @@ const Game = () => {
     health: 100,
   });
 
-  const [player2, setPlayer2] = useState({
-    name: 'Player 2',
-    style: 'Judo',
-    health: 100,
-  });
+  const [player2, setPlayer2] = useState(null); // State to store the selected opponent
+
+  const [matchOver, setMatchOver] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [player1Score, setPlayer1Score] = useState(0);
+  const [player2Score, setPlayer2Score] = useState(0);
 
   const attackPlayer = (attacker, defender) => {
-    // Logic to handle attacks
+    const damage = Math.floor(Math.random() * 20) + 1;
+    const updatedDefender = { ...defender, health: Math.max(defender.health - damage, 0) };
+    if (defender === player1) {
+      setPlayer1(updatedDefender);
+    } else {
+      setPlayer2(updatedDefender);
+    }
+    if (updatedDefender.health === 0) {
+      setMatchOver(true);
+      setWinner(attacker.name);
+      if (attacker === player1) {
+        setPlayer1Score(player1Score + 1);
+      } else {
+        setPlayer2Score(player2Score + 1);
+      }
+    }
+  };
+
+  const handleSelectOpponent = (opponent) => {
+    setPlayer2({
+      name: opponent.name,
+      style: 'Opponent Style', // Set opponent style as needed
+      health: 100, // Set opponent health
+    });
   };
 
   return (
@@ -41,9 +68,18 @@ const Game = () => {
       <Title>Martial Arts Fighting Game</Title>
       <PlayersContainer>
         <Player {...player1} />
-        <Player {...player2} />
+        {player2 && <Player {...player2} />}
       </PlayersContainer>
-      <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
+      {!player2 && <OpponentSelection onSelectOpponent={handleSelectOpponent} />} {/* Render OpponentSelection if opponent not selected */}
+      {!matchOver && player2 && (
+        <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
+      )}
+      <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+        <HealthBar value={player1.health} />
+        {player2 && <HealthBar value={player2.health} />}
+      </div>
+      {matchOver && <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />}
+      <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
     </Container>
   );
 };
