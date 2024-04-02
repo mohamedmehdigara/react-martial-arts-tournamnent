@@ -1,3 +1,4 @@
+// Game.js
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Player from './Player';
@@ -5,7 +6,7 @@ import ActionButton from './ActionButton';
 import HealthBar from './HealthBar';
 import MatchResult from './MatchResult';
 import ScoreBoard from './ScoreBoard';
-import OpponentSelection from './OpponentSelection'; // Import the OpponentSelection component
+import OpponentSelection from './OpponentSelection';
 
 const Container = styled.div`
   max-width: 600px;
@@ -29,8 +30,7 @@ const Game = () => {
     health: 100,
   });
 
-  const [player2, setPlayer2] = useState(null); // State to store the selected opponent
-
+  const [player2, setPlayer2] = useState(null);
   const [matchOver, setMatchOver] = useState(false);
   const [winner, setWinner] = useState(null);
   const [player1Score, setPlayer1Score] = useState(0);
@@ -58,7 +58,7 @@ const Game = () => {
   const handleSelectOpponent = (opponent) => {
     setPlayer2({
       name: opponent.name,
-      style: 'Opponent Style', // Set opponent style as needed
+      style: 'Judo', // Set opponent style as needed
       health: 100, // Set opponent health
     });
   };
@@ -70,7 +70,7 @@ const Game = () => {
         <Player {...player1} />
         {player2 && <Player {...player2} />}
       </PlayersContainer>
-      {!player2 && <OpponentSelection onSelectOpponent={handleSelectOpponent} />} {/* Render OpponentSelection if opponent not selected */}
+      {!player2 && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
       {!matchOver && player2 && (
         <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
       )}
@@ -78,7 +78,9 @@ const Game = () => {
         <HealthBar value={player1.health} />
         {player2 && <HealthBar value={player2.health} />}
       </div>
-      {matchOver && <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />}
+      {matchOver && (
+        <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />
+      )}
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
     </Container>
   );
