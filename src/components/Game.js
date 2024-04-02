@@ -7,6 +7,8 @@ import HealthBar from './HealthBar';
 import MatchResult from './MatchResult';
 import ScoreBoard from './ScoreBoard';
 import OpponentSelection from './OpponentSelection';
+import TrainingMode from './TrainingMode';
+import Inventory from './Inventory'; // Import the Inventory component
 
 const Container = styled.div`
   max-width: 600px;
@@ -35,6 +37,8 @@ const Game = () => {
   const [winner, setWinner] = useState(null);
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
+  const [trainingMode, setTrainingMode] = useState(false); // State to track training mode
+  const [showInventory, setShowInventory] = useState(false); // State to track inventory visibility
 
   const attackPlayer = (attacker, defender) => {
     const damage = Math.floor(Math.random() * 20) + 1;
@@ -63,6 +67,14 @@ const Game = () => {
     });
   };
 
+  const toggleTrainingMode = () => {
+    setTrainingMode(!trainingMode);
+  };
+
+  const toggleInventory = () => {
+    setShowInventory(!showInventory);
+  };
+
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
@@ -70,20 +82,31 @@ const Game = () => {
         <Player {...player1} />
         {player2 && <Player {...player2} />}
       </PlayersContainer>
-      {!player2 && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
-      {!matchOver && player2 && (
+      {!player2 && !trainingMode && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
+      {!matchOver && player2 && !trainingMode && (
         <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-        <HealthBar value={player1.health} />
-        {player2 && <HealthBar value={player2.health} />}
-      </div>
+      {!trainingMode && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+            <HealthBar value={player1.health} />
+            {player2 && <HealthBar value={player2.health} />}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+            <ActionButton onClick={toggleTrainingMode} text="Training Mode" />
+            <ActionButton onClick={toggleInventory} text={showInventory ? 'Close Inventory' : 'View Inventory'} />
+          </div>
+        </div>
+      )}
       {matchOver && (
         <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />
       )}
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
+      {trainingMode && <TrainingMode />}
+      {showInventory && <Inventory />} {/* Render Inventory component when showInventory is true */}
     </Container>
   );
 };
 
 export default Game;
+
