@@ -9,7 +9,8 @@ import OpponentSelection from './OpponentSelection';
 import TrainingMode from './TrainingMode';
 import Achievements from './Achievements';
 import Tutorial from './Tutorial';
-import Store from './Store'; // Import the Store component
+import Store from './Store';
+import StoryMode from './StoryMode'; // Import the StoryMode component
 
 const Container = styled.div`
   max-width: 600px;
@@ -40,7 +41,8 @@ const Game = () => {
   const [player2Score, setPlayer2Score] = useState(0);
   const [trainingMode, setTrainingMode] = useState(false);
   const [playerAchievements, setPlayerAchievements] = useState([]);
-  const [currencyBalance, setCurrencyBalance] = useState(1000); // Initialize currency balance
+  const [currencyBalance, setCurrencyBalance] = useState(1000);
+  const [showStoryMode, setShowStoryMode] = useState(false); // State to toggle Story Mode
 
   const attackPlayer = (attacker, defender) => {
     const damage = Math.floor(Math.random() * 20) + 1;
@@ -76,14 +78,13 @@ const Game = () => {
 
   const handlePurchase = (item) => {
     setCurrencyBalance(currencyBalance - item.price);
-    // Implement logic to apply effects of purchased item
-    setPlayerAchievements([...playerAchievements, `Purchased ${item.name}`]); // Example achievement
+    setPlayerAchievements([...playerAchievements, `Purchased ${item.name}`]);
   };
 
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
-      {!trainingMode && !matchOver && (
+      {!showStoryMode && !trainingMode && !matchOver && (
         <>
           <PlayersContainer>
             <Player {...player1} />
@@ -110,8 +111,12 @@ const Game = () => {
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
       {trainingMode && <TrainingMode />}
       <Achievements playerAchievements={playerAchievements} />
-      <Store currencyBalance={currencyBalance} onPurchase={handlePurchase} /> {/* Render Store component */}
+      <Store currencyBalance={currencyBalance} onPurchase={handlePurchase} />
       <Tutorial />
+      {showStoryMode && <StoryMode />} {/* Render StoryMode component if showStoryMode is true */}
+      {!showStoryMode && (
+        <ActionButton onClick={() => setShowStoryMode(true)} text="Start Story Mode" primary /> /* Button to start Story Mode */
+      )}
     </Container>
   );
 };
