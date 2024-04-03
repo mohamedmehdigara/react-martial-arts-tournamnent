@@ -10,7 +10,9 @@ import TrainingMode from './TrainingMode';
 import Achievements from './Achievements';
 import Tutorial from './Tutorial';
 import Store from './Store';
-import StoryMode from './StoryMode'; // Import the StoryMode component
+import StoryMode from './StoryMode';
+import Inventory from './Inventory'; // Import the Inventory component
+import Character from './Character'; // Import the Character component
 
 const Container = styled.div`
   max-width: 600px;
@@ -42,7 +44,7 @@ const Game = () => {
   const [trainingMode, setTrainingMode] = useState(false);
   const [playerAchievements, setPlayerAchievements] = useState([]);
   const [currencyBalance, setCurrencyBalance] = useState(1000);
-  const [showStoryMode, setShowStoryMode] = useState(false); // State to toggle Story Mode
+  const [showStoryMode, setShowStoryMode] = useState(false);
 
   const attackPlayer = (attacker, defender) => {
     const damage = Math.floor(Math.random() * 20) + 1;
@@ -113,9 +115,11 @@ const Game = () => {
       <Achievements playerAchievements={playerAchievements} />
       <Store currencyBalance={currencyBalance} onPurchase={handlePurchase} />
       <Tutorial />
-      {showStoryMode && <StoryMode />} {/* Render StoryMode component if showStoryMode is true */}
+      <StoryMode />
+      <Inventory /> {/* Render Inventory component */}
+      <Character /> {/* Render Character component */}
       {!showStoryMode && (
-        <ActionButton onClick={() => setShowStoryMode(true)} text="Start Story Mode" primary /> /* Button to start Story Mode */
+        <ActionButton onClick={() => setShowStoryMode(true)} text="Start Story Mode" primary />
       )}
     </Container>
   );
