@@ -1,4 +1,3 @@
-// Game.js
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Player from './Player';
@@ -8,7 +7,7 @@ import MatchResult from './MatchResult';
 import ScoreBoard from './ScoreBoard';
 import OpponentSelection from './OpponentSelection';
 import TrainingMode from './TrainingMode';
-import Inventory from './Inventory'; // Import the Inventory component
+import Tutorial from './Tutorial'; // Import the Tutorial component
 
 const Container = styled.div`
   max-width: 600px;
@@ -38,7 +37,7 @@ const Game = () => {
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
   const [trainingMode, setTrainingMode] = useState(false); // State to track training mode
-  const [showInventory, setShowInventory] = useState(false); // State to track inventory visibility
+  const [showTutorial, setShowTutorial] = useState(false); // State to track tutorial visibility
 
   const attackPlayer = (attacker, defender) => {
     const damage = Math.floor(Math.random() * 20) + 1;
@@ -71,22 +70,24 @@ const Game = () => {
     setTrainingMode(!trainingMode);
   };
 
-  const toggleInventory = () => {
-    setShowInventory(!showInventory);
+  const toggleTutorial = () => {
+    setShowTutorial(!showTutorial);
   };
 
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
-      <PlayersContainer>
-        <Player {...player1} />
-        {player2 && <Player {...player2} />}
-      </PlayersContainer>
+      {!showTutorial && (
+        <PlayersContainer>
+          <Player {...player1} />
+          {player2 && <Player {...player2} />}
+        </PlayersContainer>
+      )}
       {!player2 && !trainingMode && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
       {!matchOver && player2 && !trainingMode && (
         <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
       )}
-      {!trainingMode && (
+      {!trainingMode && !showTutorial && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
             <HealthBar value={player1.health} />
@@ -94,7 +95,7 @@ const Game = () => {
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
             <ActionButton onClick={toggleTrainingMode} text="Training Mode" />
-            <ActionButton onClick={toggleInventory} text={showInventory ? 'Close Inventory' : 'View Inventory'} />
+            <ActionButton onClick={toggleTutorial} text="View Tutorial" />
           </div>
         </div>
       )}
@@ -103,10 +104,9 @@ const Game = () => {
       )}
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
       {trainingMode && <TrainingMode />}
-      {showInventory && <Inventory />} {/* Render Inventory component when showInventory is true */}
+      {showTutorial && <Tutorial />}
     </Container>
   );
 };
 
 export default Game;
-
