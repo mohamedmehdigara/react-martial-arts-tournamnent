@@ -7,7 +7,9 @@ import MatchResult from './MatchResult';
 import ScoreBoard from './ScoreBoard';
 import OpponentSelection from './OpponentSelection';
 import TrainingMode from './TrainingMode';
-import Tutorial from './Tutorial'; // Import the Tutorial component
+import Achievements from './Achievements';
+import Tutorial from './Tutorial';
+import Store from './Store'; // Import the Store component
 
 const Container = styled.div`
   max-width: 600px;
@@ -36,8 +38,9 @@ const Game = () => {
   const [winner, setWinner] = useState(null);
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
-  const [trainingMode, setTrainingMode] = useState(false); // State to track training mode
-  const [showTutorial, setShowTutorial] = useState(false); // State to track tutorial visibility
+  const [trainingMode, setTrainingMode] = useState(false);
+  const [playerAchievements, setPlayerAchievements] = useState([]);
+  const [currencyBalance, setCurrencyBalance] = useState(1000); // Initialize currency balance
 
   const attackPlayer = (attacker, defender) => {
     const damage = Math.floor(Math.random() * 20) + 1;
@@ -55,14 +58,15 @@ const Game = () => {
       } else {
         setPlayer2Score(player2Score + 1);
       }
+      setPlayerAchievements([...playerAchievements, 'Won a match']);
     }
   };
 
   const handleSelectOpponent = (opponent) => {
     setPlayer2({
       name: opponent.name,
-      style: 'Judo', // Set opponent style as needed
-      health: 100, // Set opponent health
+      style: 'Judo',
+      health: 100,
     });
   };
 
@@ -70,41 +74,44 @@ const Game = () => {
     setTrainingMode(!trainingMode);
   };
 
-  const toggleTutorial = () => {
-    setShowTutorial(!showTutorial);
+  const handlePurchase = (item) => {
+    setCurrencyBalance(currencyBalance - item.price);
+    // Implement logic to apply effects of purchased item
+    setPlayerAchievements([...playerAchievements, `Purchased ${item.name}`]); // Example achievement
   };
 
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
-      {!showTutorial && (
-        <PlayersContainer>
-          <Player {...player1} />
-          {player2 && <Player {...player2} />}
-        </PlayersContainer>
-      )}
-      {!player2 && !trainingMode && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
-      {!matchOver && player2 && !trainingMode && (
-        <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
-      )}
-      {!trainingMode && !showTutorial && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-            <HealthBar value={player1.health} />
-            {player2 && <HealthBar value={player2.health} />}
+      {!trainingMode && !matchOver && (
+        <>
+          <PlayersContainer>
+            <Player {...player1} />
+            {player2 && <Player {...player2} />}
+          </PlayersContainer>
+          {!player2 && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
+          {player2 && (
+            <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
+          )}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+              <HealthBar value={player1.health} />
+              {player2 && <HealthBar value={player2.health} />}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+              <ActionButton onClick={toggleTrainingMode} text="Training Mode" />
+            </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <ActionButton onClick={toggleTrainingMode} text="Training Mode" />
-            <ActionButton onClick={toggleTutorial} text="View Tutorial" />
-          </div>
-        </div>
+        </>
       )}
       {matchOver && (
         <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />
       )}
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
       {trainingMode && <TrainingMode />}
-      {showTutorial && <Tutorial />}
+      <Achievements playerAchievements={playerAchievements} />
+      <Store currencyBalance={currencyBalance} onPurchase={handlePurchase} /> {/* Render Store component */}
+      <Tutorial />
     </Container>
   );
 };
