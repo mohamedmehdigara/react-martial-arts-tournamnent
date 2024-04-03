@@ -1,7 +1,6 @@
-// Player.js
-import React from 'react';
-import styled from 'styled-components';
-import Character from './Character'; // Import the Character component
+import React, { useState } from 'react';
+import styled, { keyframes } from 'styled-components';
+import Character from './Character';
 
 const Container = styled.div`
   border: 2px solid #ccc;
@@ -18,11 +17,7 @@ const Name = styled.h2`
 
 const HealthBar = styled.div`
   background-color: ${({ health }) =>
-    health > 70
-      ? '#5cb85c'
-      : health > 30
-      ? '#ffc107'
-      : '#dc3545'};
+    health > 70 ? '#5cb85c' : health > 30 ? '#ffc107' : '#dc3545'};
   height: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
@@ -32,20 +27,65 @@ const HealthLabel = styled.p`
   font-weight: bold;
 `;
 
+const Button = styled.button`
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+const bounceAnimation = keyframes`
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+`;
+
+const SpecialMoveButton = styled(Button)`
+  background-color: #dc3545;
+  animation: ${bounceAnimation} 0.5s infinite alternate;
+`;
+
 const Player = ({ name, style, health, onAttack, combo, setCombo, isPlayer1 }) => {
+  const [specialMoveEnabled, setSpecialMoveEnabled] = useState(false);
+
   const handleAttack = (attackType) => {
     onAttack(attackType);
-    setCombo([...combo, attackType]); // Add attack type to combo sequence
+    setCombo([...combo, attackType]);
   };
+
+  const handleSpecialMove = () => {
+    // Implement logic for special move
+    setSpecialMoveEnabled(false); // Disable special move after use
+  };
+
   return (
     <Container>
       <Name>{name}</Name>
-      {/* Render the Character component with the selected martial arts style */}
       <Character style={style} />
-      <HealthBar style={{ width: `${health}%` }} />
+      <HealthBar health={health} style={{ width: `${health}%` }} />
       <HealthLabel>Health: {health}</HealthLabel>
-      <button onClick={() => handleAttack('Punch')}>Punch</button>
-      <button onClick={() => handleAttack('Kick')}>Kick</button>
+      <div>
+        <Button onClick={() => handleAttack('Punch')}>Punch</Button>
+        <Button onClick={() => handleAttack('Kick')}>Kick</Button>
+        {specialMoveEnabled && (
+          <SpecialMoveButton onClick={handleSpecialMove}>Special Move</SpecialMoveButton>
+        )}
+      </div>
     </Container>
   );
 };
