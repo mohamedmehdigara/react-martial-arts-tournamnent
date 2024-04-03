@@ -11,8 +11,8 @@ import Achievements from './Achievements';
 import Tutorial from './Tutorial';
 import Store from './Store';
 import StoryMode from './StoryMode';
-import Inventory from './Inventory'; // Import the Inventory component
-import Character from './Character'; // Import the Character component
+import Inventory from './Inventory';
+import Character from './Character';
 
 const Container = styled.div`
   max-width: 600px;
@@ -45,6 +45,31 @@ const Game = () => {
   const [playerAchievements, setPlayerAchievements] = useState([]);
   const [currencyBalance, setCurrencyBalance] = useState(1000);
   const [showStoryMode, setShowStoryMode] = useState(false);
+  const [player1Combo, setPlayer1Combo] = useState([]);
+  const [player2Combo, setPlayer2Combo] = useState([]);
+
+  const [opponentStyle, setOpponentStyle] = useState('');
+
+  const handlePlayerAttack = (attackType) => {
+    // Implement attack logic and combo system here
+    // Add attack type to combo sequence
+    // Check for combo sequence and apply damage accordingly
+  };
+
+  const handleOpponentSelection = () => {
+    const techniques = ['Karate', 'Tae Kwon Do', 'Kick Boxing'];
+    const randomTechnique = techniques[Math.floor(Math.random() * techniques.length)];
+    setOpponentStyle(randomTechnique);
+  };
+
+  const toggleTrainingMode = () => {
+    setTrainingMode(!trainingMode);
+  };
+
+  const handlePurchase = (item) => {
+    setCurrencyBalance(currencyBalance - item.price);
+    setPlayerAchievements([...playerAchievements, `Purchased ${item.name}`]);
+  };
 
   const attackPlayer = (attacker, defender) => {
     const damage = Math.floor(Math.random() * 20) + 1;
@@ -66,33 +91,29 @@ const Game = () => {
     }
   };
 
-  const handleSelectOpponent = (opponent) => {
-    setPlayer2({
-      name: opponent.name,
-      style: 'Judo',
-      health: 100,
-    });
-  };
-
-  const toggleTrainingMode = () => {
-    setTrainingMode(!trainingMode);
-  };
-
-  const handlePurchase = (item) => {
-    setCurrencyBalance(currencyBalance - item.price);
-    setPlayerAchievements([...playerAchievements, `Purchased ${item.name}`]);
-  };
-
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
       {!showStoryMode && !trainingMode && !matchOver && (
         <>
           <PlayersContainer>
-            <Player {...player1} />
-            {player2 && <Player {...player2} />}
+            <Player
+              {...player1}
+              onAttack={handlePlayerAttack}
+              combo={player1Combo}
+              setCombo={setPlayer1Combo}
+              isPlayer1
+            />
+            {player2 && (
+              <Player
+                {...player2}
+                onAttack={handlePlayerAttack}
+                combo={player2Combo}
+                setCombo={setPlayer2Combo}
+              />
+            )}
           </PlayersContainer>
-          {!player2 && <OpponentSelection onSelectOpponent={handleSelectOpponent} />}
+          {!player2 && <OpponentSelection onSelectOpponent={handleOpponentSelection} />}
           {player2 && (
             <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
           )}
@@ -116,8 +137,8 @@ const Game = () => {
       <Store currencyBalance={currencyBalance} onPurchase={handlePurchase} />
       <Tutorial />
       <StoryMode />
-      <Inventory /> {/* Render Inventory component */}
-      <Character /> {/* Render Character component */}
+      <Inventory />
+      <Character />
       {!showStoryMode && (
         <ActionButton onClick={() => setShowStoryMode(true)} text="Start Story Mode" primary />
       )}

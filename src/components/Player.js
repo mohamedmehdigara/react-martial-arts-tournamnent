@@ -32,7 +32,11 @@ const HealthLabel = styled.p`
   font-weight: bold;
 `;
 
-const Player = ({ name, style, health }) => {
+const Player = ({ name, style, health, onAttack, combo, setCombo, isPlayer1 }) => {
+  const handleAttack = (attackType) => {
+    onAttack(attackType);
+    setCombo([...combo, attackType]); // Add attack type to combo sequence
+  };
   return (
     <Container>
       <Name>{name}</Name>
@@ -40,6 +44,8 @@ const Player = ({ name, style, health }) => {
       <Character style={style} />
       <HealthBar style={{ width: `${health}%` }} />
       <HealthLabel>Health: {health}</HealthLabel>
+      <button onClick={() => handleAttack('Punch')}>Punch</button>
+      <button onClick={() => handleAttack('Kick')}>Kick</button>
     </Container>
   );
 };
