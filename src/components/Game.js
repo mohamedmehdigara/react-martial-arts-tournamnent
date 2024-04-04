@@ -48,8 +48,6 @@ const Game = () => {
   const [player1Combo, setPlayer1Combo] = useState([]);
   const [player2Combo, setPlayer2Combo] = useState([]);
 
-  const [opponentStyle, setOpponentStyle] = useState('');
-
   const handlePlayerAttack = (attackType) => {
     // Implement attack logic and combo system here
     // Add attack type to combo sequence
@@ -59,7 +57,11 @@ const Game = () => {
   const handleOpponentSelection = () => {
     const techniques = ['Karate', 'Tae Kwon Do', 'Kick Boxing'];
     const randomTechnique = techniques[Math.floor(Math.random() * techniques.length)];
-    setOpponentStyle(randomTechnique);
+    setPlayer2({
+      name: 'Opponent',
+      style: randomTechnique,
+      health: 100,
+    });
   };
 
   const toggleTrainingMode = () => {

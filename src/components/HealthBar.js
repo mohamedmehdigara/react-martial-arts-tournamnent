@@ -10,11 +10,17 @@ const Container = styled.div`
 `;
 
 const Bar = styled.div`
-  width: ${({ value }) => value}%;
-  height: 100%;
-  background-color: ${({ value }) =>
-    value > 70 ? '#5cb85c' : value > 30 ? '#ffc107' : '#dc3545'};
+  background-color: ${({ $health }) =>
+    $health > 70
+      ? '#5cb85c'
+      : $health > 30
+      ? '#ffc107'
+      : '#dc3545'};
+  height: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
 `;
+
 
 const HealthBar = ({ value }) => {
   return (
