@@ -1,11 +1,11 @@
-// ActionButton.js
 import React from 'react';
 import styled, { css } from 'styled-components';
 
 const Button = styled.button`
   padding: ${({ size }) => (size === 'large' ? '12px 24px' : '10px 20px')};
   font-size: ${({ size }) => (size === 'large' ? '1.2rem' : '1rem')};
-  background-color: ${({ danger, primary }) => (danger ? '#dc3545' : primary ? '#28a745' : '#007bff')};
+  background-color: ${({ danger, primary }) =>
+    danger ? '#dc3545' : primary ? '#28a745' : '#007bff'};
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -29,8 +29,8 @@ const ActionButton = ({ onClick, text, primary, danger, size, disabled }) => {
   return (
     <Button
       onClick={onClick}
-      primary={primary}
-      danger={danger}
+      primary={primary ? 'true' : 'false'} // Convert boolean value to string
+      danger={danger ? 'true' : 'false'} // Convert boolean value to string
       size={size}
       disabled={disabled}
       aria-disabled={disabled}
