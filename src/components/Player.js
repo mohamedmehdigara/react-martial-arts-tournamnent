@@ -43,71 +43,56 @@ const Button = styled.button`
   }
 `;
 
-const bounceAnimation = keyframes`
+const punchAnimation = keyframes`
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(20px) translateY(-20px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+`;
+
+const kickAnimation = keyframes`
   0% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-20px);
   }
   100% {
     transform: translateY(0);
   }
 `;
 
-const SpecialMoveButton = styled(Button)`
-  background-color: #dc3545;
-  animation: ${bounceAnimation} 0.5s infinite alternate;
+const AnimatedCharacter = styled(Character)`
+  animation: ${({ attackType }) => (attackType === 'punch' ? punchAnimation : kickAnimation)} 0.5s
+    ease-in-out;
 `;
 
-// Define a simple AttackAnimation component
-const AttackAnimation = styled.div`
-  width: 100px;
-  height: 100px;
-  background-color: red;
-  margin: 10px auto;
-`;
-
-const Player = ({ name, style, health, onAttack, combo, setCombo, isPlayer1 }) => {
-  const [specialMoveEnabled, setSpecialMoveEnabled] = useState(false);
+const Player = ({ name, style, health, onAttack }) => {
   const [selectedAttackType, setSelectedAttackType] = useState(null);
-  const [selectedBodyPart, setSelectedBodyPart] = useState(null);
 
   const handleAttack = (attackType) => {
-    onAttack(attackType);
-    setCombo([...combo, attackType]);
-  };
-
-  const handleSpecialMove = () => {
-    // Implement logic for special move
-    setSpecialMoveEnabled(false); // Disable special move after use
-  };
-
-  const handlePlayerAttack = (attackType) => {
     setSelectedAttackType(attackType);
-    if (attackType === 'Punch') {
-      setSelectedBodyPart('hands');
-    } else if (attackType === 'Kick') {
-      setSelectedBodyPart('legs');
-    }
+    setTimeout(() => {
+      setSelectedAttackType(null); // Reset attack animation after 0.5s
+    }, 500);
+    onAttack(attackType); // Call the onAttack function with the selected attack type
   };
 
   return (
     <Container>
       <Name>{name}</Name>
-      <Character style={style} />
+      <AnimatedCharacter style={style} attackType={selectedAttackType} />
       <HealthBar health={health} style={{ width: `${health}%` }} />
       <HealthLabel>Health: {health}</HealthLabel>
       <div>
-        <Button onClick={() => handleAttack('Punch')}>Punch</Button>
-        <Button onClick={() => handleAttack('Kick')}>Kick</Button>
-        {specialMoveEnabled && (
-          <SpecialMoveButton onClick={handleSpecialMove}>Special Move</SpecialMoveButton>
-        )}
+        <Button onClick={() => handleAttack('punch')}>Punch</Button>
+        <Button onClick={() => handleAttack('kick')}>Kick</Button>
       </div>
-      {selectedAttackType && (
-        <AttackAnimation bodyPart={selectedBodyPart} attackType={selectedAttackType} />
-      )}
     </Container>
   );
 };

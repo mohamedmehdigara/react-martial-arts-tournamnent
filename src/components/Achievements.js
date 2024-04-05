@@ -45,7 +45,7 @@ const Achievements = ({ playerAchievements }) => {
     <Container>
       <Title>Achievements</Title>
       <AchievementList>
-        {playerAchievements.map((achievementId) => {
+        {playerAchievements && playerAchievements.map((achievementId) => {
           const achievement = achievementsData.find((data) => data.id === achievementId);
           return (
             <AchievementItem key={achievement.id}>

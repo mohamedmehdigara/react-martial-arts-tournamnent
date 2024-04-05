@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Player from './Player';
-import ActionButton from './ActionButton';
 import HealthBar from './HealthBar';
 import MatchResult from './MatchResult';
 import ScoreBoard from './ScoreBoard';
 import OpponentSelection from './OpponentSelection';
-import TrainingMode from './TrainingMode';
 import Achievements from './Achievements';
-import Tutorial from './Tutorial';
+import ActionButton from './ActionButton';
+import Inventory from './Inventory';
 import Store from './Store';
 import StoryMode from './StoryMode';
-import Inventory from './Inventory';
+import TrainingMode from './TrainingMode';
+import Tutorial from './Tutorial';
 import Character from './Character';
+import AnimatedCharacter from './AnimatedCharacter'; // Added AnimatedCharacter import
 
 const Container = styled.div`
   max-width: 600px;
@@ -41,42 +42,8 @@ const Game = () => {
   const [winner, setWinner] = useState(null);
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
-  const [trainingMode, setTrainingMode] = useState(false);
-  const [playerAchievements, setPlayerAchievements] = useState([]);
-  const [currencyBalance, setCurrencyBalance] = useState(1000);
-  const [showStoryMode, setShowStoryMode] = useState(false);
-  const [player1Combo, setPlayer1Combo] = useState([]);
-  const [player2Combo, setPlayer2Combo] = useState([]);
-  const [selectedAttackType, setSelectedAttackType] = useState(null);
-  const [selectedBodyPart, setSelectedBodyPart] = useState(null);
 
-
-  const handlePlayerAttack = (attackType) => {
-    // Implement attack logic and combo system here
-    // Add attack type to combo sequence
-    // Check for combo sequence and apply damage accordingly
-  };
-
-  const handleOpponentSelection = () => {
-    const techniques = ['Karate', 'Tae Kwon Do', 'Kick Boxing'];
-    const randomTechnique = techniques[Math.floor(Math.random() * techniques.length)];
-    setPlayer2({
-      name: 'Opponent',
-      style: randomTechnique,
-      health: 100,
-    });
-  };
-
-  const toggleTrainingMode = () => {
-    setTrainingMode(!trainingMode);
-  };
-
-  const handlePurchase = (item) => {
-    setCurrencyBalance(currencyBalance - item.price);
-    setPlayerAchievements([...playerAchievements, `Purchased ${item.name}`]);
-  };
-
-  const attackPlayer = (attacker, defender) => {
+  const handlePlayerAttack = (attacker, defender, attackType) => {
     const damage = Math.floor(Math.random() * 20) + 1;
     const updatedDefender = { ...defender, health: Math.max(defender.health - damage, 0) };
     if (defender === player1) {
@@ -92,68 +59,43 @@ const Game = () => {
       } else {
         setPlayer2Score(player2Score + 1);
       }
-      setPlayerAchievements([...playerAchievements, 'Won a match']);
     }
   };
 
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
-      {!showStoryMode && !trainingMode && !matchOver && (
+      {!matchOver && (
         <>
           <PlayersContainer>
-          <Player
-  {...player1}
-  onAttack={handlePlayerAttack}
-  combo={player1Combo}
-  setCombo={setPlayer1Combo}
-  isPlayer1
-  selectedBodyPart={selectedBodyPart}
-  selectedAttackType={selectedAttackType}
-/>
-
+            <Player {...player1} onAttack={(attackType) => handlePlayerAttack(player1, player2, attackType)} />
             {player2 && (
-             <Player
-             {...player2}
-             onAttack={handlePlayerAttack}
-             combo={player2Combo}
-             setCombo={setPlayer1Combo}
-             isPlayer2
-             selectedBodyPart={selectedBodyPart}
-             selectedAttackType={selectedAttackType}
-           />
-           
+              <Player
+                {...player2}
+                onAttack={(attackType) => handlePlayerAttack(player2, player1, attackType)}
+              />
             )}
           </PlayersContainer>
-          {!player2 && <OpponentSelection onSelectOpponent={handleOpponentSelection} />}
-          {player2 && (
-            <ActionButton onClick={() => attackPlayer(player1, player2)} text="Attack" primary />
-          )}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-              <HealthBar value={player1.health} />
-              {player2 && <HealthBar value={player2.health} />}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-              <ActionButton onClick={toggleTrainingMode} text="Training Mode" />
-            </div>
-          </div>
+          {!player2 && <OpponentSelection onSelectOpponent={setPlayer2} />}
         </>
       )}
       {matchOver && (
         <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />
       )}
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
-      {trainingMode && <TrainingMode />}
-      <Achievements playerAchievements={playerAchievements} />
-      <Store currencyBalance={currencyBalance} onPurchase={handlePurchase} />
-      <Tutorial />
-      <StoryMode />
+      {player1 && <HealthBar value={player1.health} />}
+      {player2 && <HealthBar value={player2.health} />}
+      <Achievements />
+      <ActionButton />
       <Inventory />
-      <Character />
-      {!showStoryMode && (
-        <ActionButton onClick={() => setShowStoryMode(true)} text="Start Story Mode" primary />
-      )}
+      <Store />
+      <StoryMode />
+      <TrainingMode />
+      <Tutorial />
+      <Character style={player1.style} />
+      {player2 && <Character style={player2.style} />}
+      {player1 && <AnimatedCharacter style={player1.style} />} {/* Render AnimatedCharacter for player1 */}
+      {player2 && <AnimatedCharacter style={player2.style} />} {/* Render AnimatedCharacter for player2 */}
     </Container>
   );
 };
