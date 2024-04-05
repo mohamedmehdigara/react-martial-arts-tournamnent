@@ -47,6 +47,9 @@ const Game = () => {
   const [showStoryMode, setShowStoryMode] = useState(false);
   const [player1Combo, setPlayer1Combo] = useState([]);
   const [player2Combo, setPlayer2Combo] = useState([]);
+  const [selectedAttackType, setSelectedAttackType] = useState(null);
+  const [selectedBodyPart, setSelectedBodyPart] = useState(null);
+
 
   const handlePlayerAttack = (attackType) => {
     // Implement attack logic and combo system here
@@ -99,20 +102,27 @@ const Game = () => {
       {!showStoryMode && !trainingMode && !matchOver && (
         <>
           <PlayersContainer>
-            <Player
-              {...player1}
-              onAttack={handlePlayerAttack}
-              combo={player1Combo}
-              setCombo={setPlayer1Combo}
-              isPlayer1
-            />
+          <Player
+  {...player1}
+  onAttack={handlePlayerAttack}
+  combo={player1Combo}
+  setCombo={setPlayer1Combo}
+  isPlayer1
+  selectedBodyPart={selectedBodyPart}
+  selectedAttackType={selectedAttackType}
+/>
+
             {player2 && (
-              <Player
-                {...player2}
-                onAttack={handlePlayerAttack}
-                combo={player2Combo}
-                setCombo={setPlayer2Combo}
-              />
+             <Player
+             {...player2}
+             onAttack={handlePlayerAttack}
+             combo={player2Combo}
+             setCombo={setPlayer1Combo}
+             isPlayer2
+             selectedBodyPart={selectedBodyPart}
+             selectedAttackType={selectedAttackType}
+           />
+           
             )}
           </PlayersContainer>
           {!player2 && <OpponentSelection onSelectOpponent={handleOpponentSelection} />}

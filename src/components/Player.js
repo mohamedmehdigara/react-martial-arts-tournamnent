@@ -60,8 +60,18 @@ const SpecialMoveButton = styled(Button)`
   animation: ${bounceAnimation} 0.5s infinite alternate;
 `;
 
+// Define a simple AttackAnimation component
+const AttackAnimation = styled.div`
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  margin: 10px auto;
+`;
+
 const Player = ({ name, style, health, onAttack, combo, setCombo, isPlayer1 }) => {
   const [specialMoveEnabled, setSpecialMoveEnabled] = useState(false);
+  const [selectedAttackType, setSelectedAttackType] = useState(null);
+  const [selectedBodyPart, setSelectedBodyPart] = useState(null);
 
   const handleAttack = (attackType) => {
     onAttack(attackType);
@@ -71,6 +81,15 @@ const Player = ({ name, style, health, onAttack, combo, setCombo, isPlayer1 }) =
   const handleSpecialMove = () => {
     // Implement logic for special move
     setSpecialMoveEnabled(false); // Disable special move after use
+  };
+
+  const handlePlayerAttack = (attackType) => {
+    setSelectedAttackType(attackType);
+    if (attackType === 'Punch') {
+      setSelectedBodyPart('hands');
+    } else if (attackType === 'Kick') {
+      setSelectedBodyPart('legs');
+    }
   };
 
   return (
@@ -86,6 +105,9 @@ const Player = ({ name, style, health, onAttack, combo, setCombo, isPlayer1 }) =
           <SpecialMoveButton onClick={handleSpecialMove}>Special Move</SpecialMoveButton>
         )}
       </div>
+      {selectedAttackType && (
+        <AttackAnimation bodyPart={selectedBodyPart} attackType={selectedAttackType} />
+      )}
     </Container>
   );
 };
