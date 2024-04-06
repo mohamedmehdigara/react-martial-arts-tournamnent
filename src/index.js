@@ -1,11 +1,14 @@
-// src/index.js
 import React from 'react';
-import ReactDOM from 'react-dom';
-import Game from './components/Game';
+import ReactDOM from 'react-dom/client';
+import { StyleSheetManager } from 'styled-components';
+import App from './App';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <Game />
-  </React.StrictMode>,
-  document.getElementById('root')
+// Use createRoot to render your application
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// Wrap your root component with StyleSheetManager and specify which props to forward
+root.render(
+  <StyleSheetManager shouldForwardProp={(prop) => prop !== 'primary' && prop !== 'danger' && prop !== 'health' && prop !== 'animation'}>
+    <App />
+  </StyleSheetManager>
 );

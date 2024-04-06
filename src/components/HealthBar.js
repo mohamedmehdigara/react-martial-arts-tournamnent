@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -10,27 +10,23 @@ const Container = styled.div`
 `;
 
 const Bar = styled.div`
-  background-color: ${({ $health }) =>
-    $health > 70
+  background-color: ${({ health }) =>
+    health > 70
       ? '#5cb85c'
-      : $health > 30
+      : health > 30
       ? '#ffc107'
       : '#dc3545'};
-  height: 10px;
+  height: 100%;
+  width: ${({ health }) => `${health}%`}; /* Adjust width based on health percentage */
   border-radius: 5px;
-  margin-bottom: 10px;
 `;
 
-
-
 const HealthBar = ({ value }) => {
-  const [playerHealth, setPlayerHealth] = useState(100);
-  const sanitizedHealth = isNaN(playerHealth) ? 100 : playerHealth;
-
+  const health = isNaN(value) ? 100 : Math.max(0, Math.min(value, 100)); // Ensure health is between 0 and 100
 
   return (
     <Container>
-      <Bar value={value} {...sanitizedHealth} />
+      <Bar health={health} />
     </Container>
   );
 };
