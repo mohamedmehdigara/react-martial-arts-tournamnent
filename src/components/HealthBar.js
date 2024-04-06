@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -22,10 +22,15 @@ const Bar = styled.div`
 `;
 
 
+
 const HealthBar = ({ value }) => {
+  const [playerHealth, setPlayerHealth] = useState(100);
+  const sanitizedHealth = isNaN(playerHealth) ? 100 : playerHealth;
+
+
   return (
     <Container>
-      <Bar value={value} />
+      <Bar value={value} {...sanitizedHealth} />
     </Container>
   );
 };

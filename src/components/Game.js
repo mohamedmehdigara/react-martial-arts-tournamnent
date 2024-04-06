@@ -13,7 +13,7 @@ import StoryMode from './StoryMode';
 import TrainingMode from './TrainingMode';
 import Tutorial from './Tutorial';
 import Character from './Character';
-import AnimatedCharacter from './AnimatedCharacter'; // Added AnimatedCharacter import
+import AnimatedCharacter from './AnimatedCharacter';
 
 const Container = styled.div`
   max-width: 600px;
@@ -36,6 +36,8 @@ const Game = () => {
     style: 'Karate',
     health: 100,
   });
+  const [playerHealth, setPlayerHealth] = useState(100);
+
 
   const [player2, setPlayer2] = useState(null);
   const [matchOver, setMatchOver] = useState(false);
@@ -62,17 +64,20 @@ const Game = () => {
     }
   };
 
+  const sanitizedHealth = isNaN(playerHealth) ? 100 : playerHealth;
+
+
   return (
     <Container>
       <Title>Martial Arts Fighting Game</Title>
       {!matchOver && (
         <>
           <PlayersContainer>
-            <Player {...player1} onAttack={(attackType) => handlePlayerAttack(player1, player2, attackType)} />
+            <Player {...player1} onAttack={(attackType) => handlePlayerAttack(player1, player2, attackType)} health={playerHealth && !isNaN(playerHealth) ? playerHealth : 100} />
             {player2 && (
               <Player
                 {...player2}
-                onAttack={(attackType) => handlePlayerAttack(player2, player1, attackType)}
+                onAttack={(attackType) => handlePlayerAttack(player2, player1, attackType)} health={playerHealth && !isNaN(playerHealth) ? playerHealth : 100}
               />
             )}
           </PlayersContainer>
@@ -83,8 +88,8 @@ const Game = () => {
         <MatchResult winner={winner} loser={winner === player1.name ? player2.name : player1.name} />
       )}
       <ScoreBoard player1Score={player1Score} player2Score={player2Score} />
-      {player1 && <HealthBar value={player1.health} />}
-      {player2 && <HealthBar value={player2.health} />}
+      <HealthBar value={player1 && player1.health} {...sanitizedHealth}/> {/* Check if player1 exists before accessing health */}
+      <HealthBar value={player2 && player2.health} {...sanitizedHealth}/> {/* Check if player2 exists before accessing health */}
       <Achievements />
       <ActionButton />
       <Inventory />
@@ -92,10 +97,10 @@ const Game = () => {
       <StoryMode />
       <TrainingMode />
       <Tutorial />
-      <Character style={player1.style} />
+      <Character style={player1 && player1.style} /> {/* Check if player1 exists before accessing style */}
       {player2 && <Character style={player2.style} />}
-      {player1 && <AnimatedCharacter style={player1.style} />} {/* Render AnimatedCharacter for player1 */}
-      {player2 && <AnimatedCharacter style={player2.style} />} {/* Render AnimatedCharacter for player2 */}
+      {player1 && <AnimatedCharacter style={player1.style} />}
+      {player2 && <AnimatedCharacter style={player2.style} />}
     </Container>
   );
 };
