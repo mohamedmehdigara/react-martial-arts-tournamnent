@@ -16,11 +16,12 @@ const Name = styled.h2`
 `;
 
 const HealthBar = styled.div`
-  background-color: ${({ health }) =>
-    health > 70 ? '#5cb85c' : health > 30 ? '#ffc107' : '#dc3545'};
+  background-color: ${({ $health }) =>
+    $health > 70 ? '#5cb85c' : $health > 30 ? '#ffc107' : '#dc3545'};
   height: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
+  transition: width 0.3s ease; /* Add transition effect for health bar width */
 `;
 
 const HealthLabel = styled.p`
@@ -45,34 +46,35 @@ const Button = styled.button`
 
 const punchAnimation = keyframes`
   0% {
-    transform: translateX(0) translateY(0);
+    transform: rotate(0deg);
   }
   50% {
-    transform: translateX(20px) translateY(-20px);
+    transform: rotate(30deg);
   }
   100% {
-    transform: translateX(0) translateY(0);
+    transform: rotate(0deg);
   }
 `;
 
 const kickAnimation = keyframes`
   0% {
-    transform: translateY(0);
+    transform: rotate(0deg);
   }
   50% {
-    transform: translateY(-20px);
+    transform: rotate(-30deg);
   }
   100% {
-    transform: translateY(0);
+    transform: rotate(0deg);
   }
 `;
 
 const AnimatedCharacter = styled(Character)`
-  animation: ${({ attackType }) => (attackType === 'punch' ? punchAnimation : kickAnimation)} 0.5s
+  animation: ${({ attackType }) =>
+    attackType === 'punch' ? punchAnimation : attackType === 'kick' ? kickAnimation : 'none'} 0.5s
     ease-in-out;
 `;
 
-const Player = ({ name, style, health, onAttack }) => {
+const Player = ({ name, style, $health, onAttack }) => {
   const [selectedAttackType, setSelectedAttackType] = useState(null);
 
   const handleAttack = (attackType) => {
@@ -87,8 +89,8 @@ const Player = ({ name, style, health, onAttack }) => {
     <Container>
       <Name>{name}</Name>
       <AnimatedCharacter style={style} attackType={selectedAttackType} />
-      <HealthBar health={health} style={{ width: `${health}%` }} />
-      <HealthLabel>Health: {health}</HealthLabel>
+      <HealthBar health={$health} style={{ width: `${$health}%` }} />
+      <HealthLabel>Health: {$health}</HealthLabel>
       <div>
         <Button onClick={() => handleAttack('punch')}>Punch</Button>
         <Button onClick={() => handleAttack('kick')}>Kick</Button>

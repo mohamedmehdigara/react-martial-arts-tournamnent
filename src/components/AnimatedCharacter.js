@@ -35,16 +35,20 @@ const Character = styled.div`
   border-radius: 50%; /* Assuming the character is circular */
   animation-duration: 0.5s; /* Duration of the animation */
   animation-timing-function: ease-in-out; /* Timing function for smooth animation */
-
-  /* Apply punch animation when attackType is 'punch' */
-  animation-name: ${({ attackType }) => (attackType === 'punch' ? punchAnimation : 'none')};
-
-  /* Apply kick animation when attackType is 'kick' */
-  animation-name: ${({ attackType }) => (attackType === 'kick' ? kickAnimation : 'none')};
+  animation-name: ${({ animation }) => animation}; /* Apply specified animation */
 `;
 
 const AnimatedCharacter = ({ attackType }) => {
-  return <Character attackType={attackType} />;
+  let animation = 'none'; // Default animation is none
+
+  // Determine the animation based on the attackType
+  if (attackType === 'punch') {
+    animation = punchAnimation;
+  } else if (attackType === 'kick') {
+    animation = kickAnimation;
+  }
+  
+  return <Character animation={animation} />;
 };
 
 export default AnimatedCharacter;

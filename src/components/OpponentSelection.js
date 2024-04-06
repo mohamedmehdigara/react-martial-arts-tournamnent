@@ -7,7 +7,7 @@ const Container = styled.div`
 `;
 
 const OpponentCard = styled.div`
-  border: 2px solid ${({ isselected }) => (isselected ? '#007bff' : '#ccc')};
+  border: 2px solid ${({ $isselected }) => ($isselected ? '#007bff' : '#ccc')};
   border-radius: 8px;
   padding: 10px;
   margin: 10px;
@@ -49,7 +49,7 @@ const OpponentSelection = ({ onSelectOpponent }) => {
         {opponents.map((opponent) => (
           <OpponentCard
             key={opponent.id}
-            isselected={selectedOpponent && selectedOpponent.id === opponent.id}
+            $isselected={selectedOpponent && selectedOpponent.id === opponent.id}
             onClick={() => handleSelectOpponent(opponent)}
           >
             <OpponentName>{opponent.name}</OpponentName>
@@ -57,9 +57,9 @@ const OpponentSelection = ({ onSelectOpponent }) => {
           </OpponentCard>
         ))}
       </div>
+      <ActionButton onClick={() => handleSelectOpponent(null)} text="Clear Selection" />
     </Container>
   );
 };
 
 export default OpponentSelection;
-
