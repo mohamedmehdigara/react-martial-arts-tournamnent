@@ -16,12 +16,12 @@ const Name = styled.h2`
 `;
 
 const HealthBar = styled.div`
-  background-color: ${({ $health }) =>
-    $health > 70 ? '#5cb85c' : $health > 30 ? '#ffc107' : '#dc3545'};
+  background-color: ${({ health }) =>
+    health > 70 ? '#5cb85c' : health > 30 ? '#ffc107' : '#dc3545'};
   height: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
-  transition: width 0.3s ease; /* Add transition effect for health bar width */
+  transition: width 0.3s ease;
 `;
 
 const HealthLabel = styled.p`
@@ -46,51 +46,50 @@ const Button = styled.button`
 
 const punchAnimation = keyframes`
   0% {
-    transform: rotate(0deg);
+    transform: translateX(0) translateY(0);
   }
   50% {
-    transform: rotate(30deg);
+    transform: translateX(20px) translateY(-20px);
   }
   100% {
-    transform: rotate(0deg);
+    transform: translateX(0) translateY(0);
   }
 `;
 
 const kickAnimation = keyframes`
   0% {
-    transform: rotate(0deg);
+    transform: translateY(0);
   }
   50% {
-    transform: rotate(-30deg);
+    transform: translateY(-20px);
   }
   100% {
-    transform: rotate(0deg);
+    transform: translateY(0);
   }
 `;
 
 const AnimatedCharacter = styled(Character)`
-  animation: ${({ attackType }) =>
-    attackType === 'punch' ? punchAnimation : attackType === 'kick' ? kickAnimation : 'none'} 0.5s
+  animation: ${({ attacktype }) => (attacktype === 'punch' ? punchAnimation : attacktype === 'kick' ? kickAnimation : 'none')} 0.5s
     ease-in-out;
 `;
 
-const Player = ({ name, style, $health, onAttack }) => {
-  const [selectedAttackType, setSelectedAttackType] = useState(null);
+const Player = ({ name, style, health, onAttack }) => {
+  const [selectedAttacktype, setSelectedAttacktype] = useState(null);
 
-  const handleAttack = (attackType) => {
-    setSelectedAttackType(attackType);
+  const handleAttack = (attacktype) => {
+    setSelectedAttacktype(attacktype);
     setTimeout(() => {
-      setSelectedAttackType(null); // Reset attack animation after 0.5s
+      setSelectedAttacktype(null); // Reset attack animation after 0.5s
     }, 500);
-    onAttack(attackType); // Call the onAttack function with the selected attack type
+    onAttack(attacktype); // Call the onAttack function with the selected attack type
   };
 
   return (
     <Container>
       <Name>{name}</Name>
-      <AnimatedCharacter style={style} attackType={selectedAttackType} />
-      <HealthBar health={$health} style={{ width: `${$health}%` }} />
-      <HealthLabel>Health: {$health}</HealthLabel>
+      <AnimatedCharacter style={style} attacktype={selectedAttacktype} />
+      <HealthBar health={health} style={{ width: `${health}%` }} />
+      <HealthLabel>Health: {health}</HealthLabel>
       <div>
         <Button onClick={() => handleAttack('punch')}>Punch</Button>
         <Button onClick={() => handleAttack('kick')}>Kick</Button>
