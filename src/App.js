@@ -2,204 +2,175 @@ import React, { useEffect, memo } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { create } from 'zustand';
 
-// --- ANIMATIONS ---
-const punchFlow = keyframes`
-  0% { transform: translate(0, 0); }
-  15% { transform: translate(-25px, 8px) rotate(-8deg); } 
-  40% { transform: translate(85px, -8px) rotate(8deg); filter: brightness(1.3); } 
-  100% { transform: translate(0, 0); }
-`;
-
-const kickFlow = keyframes`
+// --- KEYFRAMES ---
+const armPunch = keyframes`
   0% { transform: rotate(0); }
-  25% { transform: rotate(-40deg) translateY(-30px); } 
-  50% { transform: rotate(120deg) translateX(65px); } 
+  25% { transform: rotate(-30deg) translateX(-10px); }
+  50% { transform: rotate(90deg) scaleX(1.8) translateX(20px); filter: brightness(1.5); }
   100% { transform: rotate(0); }
 `;
 
-const hurtReact = keyframes`
-  0% { transform: translateX(0); filter: contrast(3) brightness(2); }
-  15% { transform: translateX(35px) skew(-10deg); }
-  100% { transform: translateX(0); filter: contrast(1) brightness(1); }
+const legKick = keyframes`
+  0% { transform: rotate(0); }
+  30% { transform: rotate(-60deg) translateY(-20px); }
+  60% { transform: rotate(110deg) scaleY(1.4) translateX(30px); }
+  100% { transform: rotate(0); }
+`;
+
+const bodyHurt = keyframes`
+  0% { transform: translateX(0); filter: contrast(4) invert(0.2); }
+  20% { transform: translateX(40px) rotate(5deg); }
+  100% { transform: translateX(0); filter: contrast(1); }
 `;
 
 const breathe = keyframes`
   0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(1.03) translateY(-3px); }
+  50% { transform: scaleY(1.03) translateY(-2px); }
 `;
 
 // --- STORE ---
-const useCombatStore = create((set, get) => ({
-  player: { hp: 100, ap: 4, anim: 'idle' },
-  opponent: { hp: 100, anim: 'idle' },
-  worldFx: { shake: false },
-  aiTimer: null,
+const useGameStore = create((set, get) => ({
+  player: { hp: 100, ap: 4, anim: 'idle', lastId: 0 },
+  opponent: { hp: 100, anim: 'idle', lastId: 0 },
+  game: { shake: false },
 
-  regenAp: () => {
+  tick: () => {
     const { player, opponent } = get();
-    if (opponent.hp <= 0 || player.hp <= 0 || player.ap >= 5) return;
-    set((state) => ({
-      player: { ...state.player, ap: Math.min(5, state.player.ap + 0.1) }
-    }));
+    if (opponent.hp <= 0 || player.hp <= 0) return;
+    set((s) => ({ player: { ...s.player, ap: Math.min(5, s.player.ap + 0.15) } }));
   },
 
-  executeMove: (type, dmg, cost, hitDelay) => {
+  performMove: (type, dmg, cost, hitDelay) => {
     const { player, opponent } = get();
     if (player.anim !== 'idle' || player.ap < cost || opponent.hp <= 0) return;
 
-    // Deduct cost and start animation
-    set((state) => ({ 
-      player: { ...state.player, anim: type, ap: state.player.ap - cost } 
-    }));
+    set(s => ({ player: { ...s.player, anim: type, ap: s.player.ap - cost, lastId: Date.now() } }));
 
     setTimeout(() => {
-      // Re-verify opponent state at the moment of impact
       if (get().opponent.hp <= 0) return;
-
-      set((state) => ({ 
-        opponent: { ...state.opponent, hp: Math.max(0, state.opponent.hp - dmg), anim: 'hurt' },
-        worldFx: { shake: true }
+      set(s => ({ 
+        opponent: { ...s.opponent, hp: Math.max(0, s.opponent.hp - dmg), anim: 'hurt', lastId: Date.now() },
+        game: { shake: true }
       }));
-
-      setTimeout(() => set({ worldFx: { shake: false } }), 100); 
-
+      setTimeout(() => set(s => ({ game: { shake: false } })), 100);
       setTimeout(() => {
-        set((state) => ({ 
-          player: { ...state.player, anim: 'idle' },
-          opponent: { ...state.opponent, anim: 'idle' }
-        }));
-        if (get().opponent.hp > 0) get().aiBrain();
+        set(s => ({ player: { ...s.player, anim: 'idle' }, opponent: { ...s.opponent, anim: 'idle' } }));
+        if (get().opponent.hp > 0) get().aiCounter();
       }, 400);
     }, hitDelay);
   },
 
-  aiBrain: () => {
-    const { opponent, player } = get();
-    if (opponent.anim !== 'idle' || opponent.hp <= 0 || player.hp <= 0) return;
-    
-    const timer = setTimeout(() => {
+  aiCounter: () => {
+    setTimeout(() => {
       if (get().opponent.hp <= 0) return;
-      
-      set((state) => ({ opponent: { ...state.opponent, anim: 'kick' } }));
-      
+      set(s => ({ opponent: { ...s.opponent, anim: 'kick', lastId: Date.now() } }));
       setTimeout(() => {
         if (get().opponent.hp <= 0) return;
-        set((state) => ({ 
-          player: { ...state.player, hp: Math.max(0, state.player.hp - 15), anim: 'hurt' },
-          worldFx: { shake: true }
+        set(s => ({ 
+          player: { ...s.player, hp: Math.max(0, s.player.hp - 15), anim: 'hurt', lastId: Date.now() },
+          game: { shake: true }
         }));
-        
-        setTimeout(() => set({ worldFx: { shake: false } }), 200);
-        setTimeout(() => set((state) => ({ 
-            player: { ...state.player, anim: 'idle' },
-            opponent: { ...state.opponent, anim: 'idle' } 
-        })), 400);
+        setTimeout(() => set(s => ({ game: { shake: false } })), 150);
+        setTimeout(() => set(s => ({ player: { ...s.player, anim: 'idle' }, opponent: { ...s.opponent, anim: 'idle' } })), 400);
       }, 450);
-    }, 1000);
-
-    set({ aiTimer: timer });
+    }, 800);
   }
 }));
 
-// --- STYLED UI ---
+// --- STYLED COMPONENTS ---
 const Stage = styled.div`
-  width: 100vw; height: 100vh; background: #050505;
+  width: 100vw; height: 100vh; background: #0a0a0a;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  overflow: hidden; font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif; overflow: hidden;
 `;
 
 const Arena = styled.div`
-  width: 100%; max-width: 1000px; height: 500px;
-  background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
-  border-bottom: 20px solid #111; position: relative;
-  display: flex; justify-content: space-around; align-items: flex-end; padding-bottom: 80px;
-  ${props => props.shake && css`transform: translate(8px, -8px);`}
+  width: 100%; max-width: 1000px; height: 450px;
+  background: radial-gradient(circle at 50% 90%, #1a1a2e 0%, #0a0a0a 80%);
+  border-bottom: 20px solid #222; position: relative;
+  display: flex; justify-content: space-around; align-items: flex-end; padding-bottom: 60px;
+  ${p => p.$shake && css`transform: translate(10px, -10px);`}
 `;
 
-const FighterWrapper = styled.div`
-  position: relative; width: 160px; height: 300px;
+const SpriteContainer = styled.div`
+  position: relative; width: 150px; height: 300px;
   display: flex; flex-direction: column; align-items: center;
-  ${p => p.anim === 'idle' && css`animation: ${breathe} 3s infinite ease-in-out;`}
-  ${props => props.side === 'right' && css`transform: scaleX(-1);`}
-  ${props => props.anim === 'punch' && css`animation: ${punchFlow} 0.5s forwards;`}
-  ${props => props.anim === 'kick' && css`animation: ${kickFlow} 0.6s forwards;`}
-  ${props => props.anim === 'hurt' && css`animation: ${hurtReact} 0.4s forwards;`}
+  animation: ${p => p.$anim === 'idle' ? css`${breathe} 3s infinite` : 'none'};
+  ${p => p.$side === 'right' && css`transform: scaleX(-1);`}
+  ${p => p.$anim === 'hurt' && css`animation: ${bodyHurt} 0.4s forwards;`}
 `;
 
 const Limb = styled.div`
   position: absolute; width: 20px; height: 70px; background: #f3c1ad;
-  border: 4px solid #000; border-radius: 14px; top: 15px;
-  ${p => p.left ? 'left: -18px;' : 'right: -18px;'}
+  border: 4px solid #000; border-radius: 12px;
   transform-origin: top center;
+
+  /* Conditional Logic using the 'css' helper to avoid interpolation errors */
+  ${p => p.$type === 'arm' && p.$anim === 'punch' && css`
+    animation: ${armPunch} 0.5s ${p.$delay || '0s'} forwards;
+  `}
+  
+  ${p => p.$type === 'leg' && p.$anim === 'kick' && css`
+    animation: ${legKick} 0.6s forwards;
+  `}
 `;
 
-const BodyPart = styled.div`
-  background: ${p => p.bg || '#f3c1ad'}; border: 4px solid #000;
-`;
+const Fighter = memo(({ data, side, isPlayer }) => (
+  <SpriteContainer $anim={data.anim} $side={side} key={data.lastId}>
+    <div style={{ width: 52, height: 60, background: '#f3c1ad', border: '4px solid #000', borderRadius: '45%', zIndex: 5 }}>
+      <div style={{ width: '110%', height: 10, background: isPlayer ? '#c0392b' : '#333', marginTop: 20, marginLeft: '-5%', border: '2px solid #000' }} />
+    </div>
+    
+    <div style={{ width: 85, height: 110, background: isPlayer ? '#fff' : '#1a1a1a', border: '4px solid #000', borderRadius: 12, marginTop: -10, position: 'relative' }}>
+      
+      {/* Arms - Passing props with $ prefix to avoid DOM warnings */}
+      <Limb $type="arm" $anim={data.anim} style={{ left: -18, top: 10 }} />
+      <Limb $type="arm" $anim={data.anim} $delay="0.1s" style={{ right: -18, top: 10 }} />
 
-const Fighter = memo(({ anim, side, isPlayer }) => (
-  <FighterWrapper anim={anim} side={side} key={`${side}-${anim}`}>
-    <BodyPart bg="#f3c1ad" style={{ width: 52, height: 58, borderRadius: '48%', zIndex: 10, position: 'relative' }}>
-      <div style={{ position: 'absolute', width: '115%', height: 10, background: isPlayer ? '#e74c3c' : '#333', top: 20, left: '-7.5%', border: '2px solid #000' }} />
-    </BodyPart>
-    <BodyPart bg={isPlayer ? '#fff' : '#1a1a1a'} style={{ width: 85, height: 115, borderRadius: 14, marginTop: -10, position: 'relative' }}>
-      <Limb left /><Limb />
-      <Limb left style={{ top: 90, height: 90, background: isPlayer ? '#fff' : '#1a1a1a', left: 14 }} />
-      <Limb style={{ top: 90, height: 90, background: isPlayer ? '#fff' : '#1a1a1a', right: 14 }} />
-    </BodyPart>
-  </FighterWrapper>
+      {/* Legs */}
+      <Limb $type="leg" $anim={data.anim} style={{ left: 15, top: 95, height: 90, background: isPlayer ? '#fff' : '#1a1a1a' }} />
+      <Limb style={{ right: 15, top: 95, height: 90, background: isPlayer ? '#fff' : '#1a1a1a' }} />
+    </div>
+  </SpriteContainer>
 ));
 
+const Bar = styled.div`
+  width: 44%; height: 30px; background: #222; border: 3px solid #000; overflow: hidden;
+  div { height: 100%; width: ${p => p.$pct}%; background: ${p => p.$side === 'left' ? '#2ecc71' : '#e74c3c'}; transition: width 0.3s; }
+`;
+
 export default function App() {
-  const s = useCombatStore();
+  const s = useGameStore();
 
   useEffect(() => {
-    const timer = setInterval(() => s.regenAp(), 100);
-    return () => {
-      clearInterval(timer);
-      if (s.aiTimer) clearTimeout(s.aiTimer);
-    };
+    const timer = setInterval(() => s.tick(), 100);
+    return () => clearInterval(timer);
   }, [s]);
 
   return (
     <Stage>
-      <div style={{ width: '100%', maxWidth: 900, padding: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 15 }}>
-          <div style={{ width: '44%', height: 30, background: '#222', border: '4px solid #000' }}>
-            <div style={{ height: '100%', width: `${s.player.hp}%`, background: '#2ecc71', transition: 'width 0.3s ease' }} />
-          </div>
-          <div style={{ color: '#fff', fontWeight: 900, fontSize: 30 }}>VS</div>
-          <div style={{ width: '44%', height: 30, background: '#222', border: '4px solid #000', display: 'flex', flexDirection: 'row-reverse' }}>
-            <div style={{ height: '100%', width: `${s.opponent.hp}%`, background: '#e74c3c', transition: 'width 0.3s ease' }} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} style={{ width: 18, height: 18, border: '3px solid #000', background: i <= s.player.ap ? '#3498db' : '#222', boxShadow: i <= s.player.ap ? '0 0 10px #3498db' : 'none' }} />
-          ))}
-        </div>
+      <div style={{ width: '100%', maxWidth: 900, padding: 20, display: 'flex', justifyContent: 'space-between' }}>
+        <Bar $side="left" $pct={s.player.hp}><div /></Bar>
+        <div style={{ color: '#fff', fontWeight: 900 }}>VS</div>
+        <Bar $side="right" $pct={s.opponent.hp}><div style={{ float: 'right' }} /></Bar>
       </div>
 
-      <Arena shake={s.worldFx.shake}>
-        <Fighter anim={s.player.anim} side="left" isPlayer />
-        <Fighter anim={s.opponent.anim} side="right" />
-        {s.opponent.hp <= 0 && <h1 style={{ position: 'absolute', top: '20%', color: '#e74c3c', fontSize: '8rem', fontWeight: 900, textShadow: '4px 4px 0 #000' }}>K.O.</h1>}
+      <div style={{ width: '100%', maxWidth: 900, display: 'flex', gap: 8, padding: '0 20px' }}>
+        {[1, 2, 3, 4, 5].map(i => (
+          <div key={i} style={{ width: 18, height: 18, border: '2px solid #000', background: i <= s.player.ap ? '#3498db' : '#222' }} />
+        ))}
+      </div>
+
+      <Arena $shake={s.game.shake}>
+        <Fighter data={s.player} side="left" isPlayer />
+        <Fighter data={s.opponent} side="right" />
+        {s.opponent.hp <= 0 && <h1 style={{ position: 'absolute', top: '20%', fontSize: '8rem', color: '#ffd700', fontWeight: 900 }}>KO</h1>}
       </Arena>
 
-      <div style={{ width: '100%', maxWidth: 900, padding: 25, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
-        <button 
-          disabled={s.player.ap < 1 || s.player.anim !== 'idle' || s.opponent.hp <= 0} 
-          onClick={() => s.executeMove('punch', 12, 1, 200)}
-          style={{ padding: 20, background: '#111', color: '#fff', border: '4px solid #333', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
-        >Punch (1 AP)</button>
-        
-        <button 
-          disabled={s.player.ap < 2.5 || s.player.anim !== 'idle' || s.opponent.hp <= 0} 
-          onClick={() => s.executeMove('kick', 30, 2.5, 300)}
-          style={{ padding: 20, background: '#111', color: '#fff', border: '4px solid #333', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
-        >Kick (2.5 AP)</button>
-        
-        <button onClick={() => window.location.reload()} style={{ padding: 20, background: '#111', color: '#fff', border: '4px solid #333', fontWeight: 900, cursor: 'pointer' }}>Reset</button>
+      <div style={{ width: '100%', maxWidth: 900, padding: 30, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <button disabled={s.player.ap < 1 || s.player.anim !== 'idle' || s.opponent.hp <= 0} onClick={() => s.performMove('punch', 10, 1, 250)} style={{ padding: 20, fontWeight: 900, cursor: 'pointer' }}>PUNCH</button>
+        <button disabled={s.player.ap < 2.5 || s.player.anim !== 'idle' || s.opponent.hp <= 0} onClick={() => s.performMove('kick', 25, 2.5, 350)} style={{ padding: 20, fontWeight: 900, cursor: 'pointer' }}>KICK</button>
+        <button onClick={() => window.location.reload()} style={{ padding: 20, fontWeight: 900, cursor: 'pointer' }}>RESET</button>
       </div>
     </Stage>
   );
